@@ -12,18 +12,19 @@ from multiprocessing import Pool
 from  multiprocessing.dummy import Pool as ThreadPool
 from functools import partial
 import threading
+import settings
 
 start_url = 'https://music.taihe.com/artist/'
-table = 'qianqian_music_singers'
-host='localhost'
-user='root'
-password='abc123456'
-port= 3306
-database='spiders'
-sleep_time = 2
+table = settings.TABLE
+host = settings.HOST
+user = settings.USER
+password = settings.PASSWORD
+port = settings.PORT
+database = settings.DATABASE
+sleep_time = settings.SLEEP_TIME
 
 def index_to_detail(index_url):
-	"""从主页获取歌手链接"""
+	"""get the singer's url from homepage"""
 	singer_url_list = []
 	start_get = requests.get(index_url).text
 	start_response = etree.HTML(start_get)
@@ -38,7 +39,7 @@ def index_to_detail(index_url):
 	return singer_url_list
 
 def get_singer_data(singer_url, sleep_time, db, browser):
-	"""从歌手网页中获取信息"""
+	"""get information from singer's page"""
 	try:
 		browser.get(singer_url)
 		wait = WebDriverWait(browser, 10)
@@ -59,7 +60,7 @@ def get_singer_data(singer_url, sleep_time, db, browser):
 		None
 
 def spider_data(response, db):
-	"""爬取信息并更新到mysql"""
+	"""update data to mysql"""
 	doc = pq(response)
 	singer_name_item = doc('.sns .music-main')
 	singer_name = singer_name_item.find('.artist-name').text()
